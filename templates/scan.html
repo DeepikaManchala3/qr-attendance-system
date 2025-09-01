@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Scan{% endblock %}
+{% block content %}
+<div class="grid grid-2">
+  <div class="card">
+    <h2>Scanner</h2>
+    <div id="reader" style="width:100%;"></div>
+    <p class="muted">Tip: First scan <strong>student</strong> QR, then <strong>book</strong> QR.</p>
+    <p class="muted">If camera blocked, grant permission or switch camera.</p>
+
+    <!-- Manual paste fallback -->
+    <div style="display:flex; gap:8px; margin-top:10px;">
+      <input id="manual" class="input" placeholder="Paste QR text like STUDENT:STU1001 or BOOK:BK0001">
+      <button class="btn" onclick="handleScan(document.getElementById('manual').value)">Use</button>
+    </div>
+  </div>
+   <div class="mb-3">
+  <label for="fingerprint" class="form-label">Fingerprint Code</label>
+  <input type="text" class="form-control" id="fingerprint" name="fingerprint" placeholder="Enter fingerprint" required>
+</div>
+
+<div class="mb-3">
+  <label class="form-label">Face Verification</label><br>
+  <button class="btn" type="button" onclick="startFaceVerification()">Verify Face</button>
+  <video id="faceCam" width="320" height="240" autoplay muted style="display:none; margin-top:10px; border:1px solid #ccc;"></video>
+</div>
+
+  <div class="card">
+    <h2>Status</h2>
+    <p id="studentStatus" class="muted">Student: —</p>
+    <p id="bookStatus" class="muted">Book: —</p>
+    <div style="display:flex; gap:8px; align-items:center; margin-top:12px;">
+      <label>Days:</label>
+      <input id="days" class="input" style="max-width:120px" type="number" value="14" min="1" max="60">
+    </div>
+    <div style="display:flex; gap:10px; margin-top:12px;">
+      <button id="borrowBtn" class="btn good" disabled>Borrow</button>
+      <button id="returnBtn" class="btn bad" disabled>Return</button>
+    </div>
+  </div>
+  
+
+</div>
+
+<script src="https://unpkg.com/html5-qrcode"></script>
+<script src="{{ url_for('static', filename='js/scan.js') }}"></script>
+{% endblock %}

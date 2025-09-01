@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{{ config.APP_NAME }} - {% block title %}{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+  <div class="container">
+    <div class="nav">
+      <a href="{{ url_for('home') }}">🏠 Dashboard</a>
+      <a href="{{ url_for('scan') }}">📚 Library Scan</a>
+      <a href="{{ url_for('attendance') }}">📝 Class Attendance</a>
+      <a href="{{ url_for('labs_page') }}">🧪 Labs Entry/Exit</a>
+      <a href="{{ url_for('hostel_page') }}">🏨 Hostel Entry/Exit</a>
+      <a href="{{ url_for('books') }}">📖 Books</a>
+      <a href="{{ url_for('students') }}">🪪 Students</a>
+      <a href="{{ url_for('history') }}">🕘 Library History</a>
+      <a href="{{ url_for('classes') }}">🏫 Classes</a>
+      <a href="{{ url_for('admin') }}">🛠️ Admin</a>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=True) %}
+      {% if messages %}
+      <div class="grid" style="margin-bottom:12px">
+        {% for cat, msg in messages %}
+          <div class="card">{{ msg }}</div>
+        {% endfor %}
+      </div>
+      {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+    <p class="muted" style="margin-top:24px">© {{ config.APP_NAME }}</p>
+  </div>
+</body>
+</html>

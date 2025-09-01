@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Class Attendance{% endblock %}
+{% block content %}
+<div class="grid grid-2">
+  <div class="card">
+    <h2>Start Attendance Session</h2>
+    <div style="display:flex; gap:8px; margin:8px 0;">
+      <select id="class_id" class="select">
+        {% for c in classes %}
+          <option value="{{ c.id }}">{{ c.name }} ({{ c.code }})</option>
+        {% endfor %}
+      </select>
+      <button class="btn" onclick="startSession()">Start / Use Open</button>
+    </div>
+    <div class="mb-3">
+  <label for="fingerprint" class="form-label">Fingerprint Code</label>
+  <input type="text" class="form-control" id="fingerprint" name="fingerprint" placeholder="Enter fingerprint" required>
+</div>
+<div class="mb-3">
+  <label for="face" class="form-label">Face Verification</label>
+  <input type="file" class="form-control" id="face" name="face" accept="image/*" capture="user" required>
+  <button class="btn" style="margin-top:8px;" onclick="verifyFace()">Verify Face</button>
+</div>
+<p id="faceStatus" class="muted"></p>
+
+    <p id="sessionInfo" class="muted">No active session.</p>
+    <div id="reader" style="width:100%;"></div>
+    <div style="display:flex; gap:8px; margin-top:8px;">
+      <input id="manual" class="input" placeholder="Paste STUDENT:STU1001 or STU1001">
+      <button class="btn" onclick="manualMark()">Mark</button>
+      <button id="stopBtn" class="btn bad" onclick="stopSession()" disabled>Stop Session</button>
+    </div>
+    <p id="markStatus" class="muted"></p>
+  </div>
+
+  <div class="card">
+    <h2>Recent Sessions</h2>
+    <ul>
+      {% for s in recent %}
+        <li>#{{ s.id }} — {{ s.classroom.name }} on {{ s.date_.strftime("%Y-%m-%d") }} — {{ s.status }}</li>
+      {% endfor %}
+    </ul>
+    <h3>Present List (Live)</h3>
+    <div id="presentList" class="muted">—</div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/html5-qrcode"></script>
+<script src="{{ url_for('static', filename='js/attendance.js') }}"></script>
+{% endblock %}

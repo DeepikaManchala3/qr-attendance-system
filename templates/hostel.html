@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Hostel Entry/Exit{% endblock %}
+{% block content %}
+<div class="grid grid-2">
+  <div class="card">
+    <h2>Gate Logging</h2>
+    <div style="display:flex; gap:8px; margin-bottom:8px;">
+      <input id="gate" class="input" value="Main Gate">
+      <button class="btn" onclick="setHostelMode('ENTRY')">ENTRY</button>
+      <button class="btn secondary" onclick="setHostelMode('EXIT')">EXIT</button>
+      <button class="btn" onclick="setHostelMode('TOGGLE')">TOGGLE</button>
+    </div>
+    <div class="mb-3">
+  <label for="fingerprint" class="form-label">Fingerprint Code</label>
+  <input type="text" class="form-control" id="fingerprint" name="fingerprint" placeholder="Enter fingerprint" required>
+</div>
+<div class="mb-3">
+  <label for="face" class="form-label">Face Verification</label>
+  <input type="file" class="form-control" id="face" name="face" accept="image/*" capture="user" required>
+  <button class="btn" style="margin-top:8px;" onclick="verifyFace()">Verify Face</button>
+</div>
+<p id="faceStatus" class="muted"></p>
+
+    <div id="reader" style="width:100%;"></div>
+    <div style="display:flex; gap:8px; margin-top:8px;">
+      <input id="manual" class="input" placeholder="Paste STUDENT:STU1001 or STU1001">
+      <button class="btn" onclick="manualHostel()">Log</button>
+    </div>
+    <p id="hMode" class="muted">Mode: TOGGLE</p>
+    <p id="hostelMsg" class="muted"></p>
+  </div>
+
+  <div class="card">
+    <h2>Recent Hostel Logs</h2>
+    <table class="table">
+      <thead><tr><th>Time</th><th>Student</th><th>Action</th><th>Gate</th></tr></thead>
+      <tbody>
+        {% for r in recent %}
+          <tr>
+            <td>{{ r.ts.strftime("%Y-%m-%d %H:%M") }}</td>
+            <td>{{ r.student_sid }}</td>
+            <td>{{ r.action }}</td>
+            <td>{{ r.gate }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script src="https://unpkg.com/html5-qrcode"></script>
+<script src="{{ url_for('static', filename='js/hostel.js') }}"></script>
+{% endblock %}

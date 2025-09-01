@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}Labs Entry/Exit{% endblock %}
+{% block content %}
+<div class="grid grid-2">
+  <div class="card">
+    <h2>Log Entry/Exit</h2>
+    <div style="display:flex; gap:8px; margin-bottom:8px;">
+      <select id="lab_id" class="select">
+        {% for l in labs %}
+          <option value="{{ l.id }}">{{ l.name }} ({{ l.code }})</option>
+        {% endfor %}
+      </select>
+      <button class="btn" onclick="refreshInside()">Check Inside</button>
+      <span id="inside" class="muted"></span>
+    </div>
+    <div class="mb-3">
+  <label for="fingerprint" class="form-label">Fingerprint Code</label>
+  <input type="text" class="form-control" id="fingerprint" name="fingerprint" placeholder="Enter fingerprint" required>
+</div>
+<div class="mb-3">
+  <label for="face" class="form-label">Face Verification</label>
+  <input type="file" class="form-control" id="face" name="face" accept="image/*" capture="user" required>
+  <button class="btn" style="margin-top:8px;" onclick="verifyFace()">Verify Face</button>
+</div>
+<p id="faceStatus" class="muted"></p>
+
+    <div id="reader" style="width:100%;"></div>
+    <div style="display:flex; gap:8px; margin-top:8px;">
+      <button class="btn" onclick="setMode('ENTRY')">ENTRY</button>
+      <button class="btn secondary" onclick="setMode('EXIT')">EXIT</button>
+      <button class="btn" onclick="setMode('TOGGLE')">TOGGLE</button>
+      <input id="manual" class="input" placeholder="Paste STUDENT:STU1001 or STU1001">
+      <button class="btn" onclick="manualLog()">Log</button>
+    </div>
+    <p id="mode" class="muted">Mode: TOGGLE</p>
+    <p id="labMsg" class="muted"></p>
+  </div>
+
+  <div class="card">
+    <h2>Add Lab</h2>
+    <form method="post" action="{{ url_for('add_lab') }}" class="grid grid-2" style="margin:14px 0;">
+      <input class="input" name="name" placeholder="Lab Name" required>
+      <input class="input" name="room" placeholder="Room (optional)">
+      <input class="input" name="code" placeholder="Custom Code (optional)">
+      <button class="btn">+ Add Lab</button>
+    </form>
+    <h2>Recent Logs</h2>
+    <table class="table">
+      <thead><tr><th>Time</th><th>Lab</th><th>Student</th><th>Action</th></tr></thead>
+      <tbody>
+        {% for r in recent %}
+          <tr>
+            <td>{{ r.ts.strftime("%Y-%m-%d %H:%M") }}</td>
+            <td>{{ r.lab.name }}</td>
+            <td>{{ r.student_sid }}</td>
+            <td>{{ r.action }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script src="https://unpkg.com/html5-qrcode"></script>
+<script src="{{ url_for('static', filename='js/labs.js') }}"></script>
+{% endblock %}

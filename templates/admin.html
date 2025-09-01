@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Admin{% endblock %}
+{% block content %}
+<div class="grid grid-2">
+  <div class="card">
+    <h2>Database</h2>
+    <p class="muted">Initialize DB and load demo data (safe to run once).</p>
+    <a class="btn" href="{{ url_for('initdb') }}">Initialize + Seed</a>
+  </div>
+  <div class="card">
+    <h2>Tips</h2>
+    <ul>
+      <li>After adding books/students, QR PNGs are stored in <code>static/qrcodes</code>.</li>
+      <li>Print and stick book QRs; put student QRs on ID cards.</li>
+    </ul>
+  </div>
+</div>
+{% endblock %}

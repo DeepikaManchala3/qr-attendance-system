@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Students{% endblock %}
+{% block content %}
+<div class="card">
+  <h2>Students</h2>
+  <form method="get" style="display:flex; gap:10px; margin:10px 0;">
+    <input class="input" name="q" placeholder="Search by name/ID…" value="{{ q }}">
+    <button class="btn">Search</button>
+  </form>
+
+  <form method="post" action="{{ url_for('add_student') }}" class="grid grid-2" style="margin:14px 0;">
+    <input class="input" name="name" placeholder="Full Name" required>
+    <input class="input" name="email" placeholder="Email (optional)">
+    <input class="input" name="sid" placeholder="Custom Student ID (optional)">
+    <button class="btn">+ Add Student & Generate QR</button>
+  </form>
+  <div class="mb-3">
+  <label for="fingerprint" class="form-label">Fingerprint Code</label>
+  <input type="text" class="form-control" id="fingerprint" name="fingerprint" placeholder="e.g. fp123" required>
+  <div class="form-text">Enter a demo fingerprint string</div>
+</div>
+
+  <table class="table">
+    <thead><tr><th>ID</th><th>Name</th><th>Email</th><th>QR</th></tr></thead>
+    <tbody>
+      {% for s in students %}
+      <tr>
+        <td>{{ s.sid }}</td>
+        <td>{{ s.name }}</td>
+        <td>{{ s.email or "-" }}</td>
+        <td><a href="{{ url_for('qrcodes', filename='student_' ~ s.sid ~ '.png') }}" target="_blank">View QR</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
