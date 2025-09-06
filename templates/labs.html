@@ -13,16 +13,16 @@
       <button class="btn" onclick="refreshInside()">Check Inside</button>
       <span id="inside" class="muted"></span>
     </div>
-    <div class="mb-3">
-  <label for="fingerprint" class="form-label">Fingerprint Code</label>
-  <input type="text" class="form-control" id="fingerprint" name="fingerprint" placeholder="Enter fingerprint" required>
-</div>
-<div class="mb-3">
-  <label for="face" class="form-label">Face Verification</label>
-  <input type="file" class="form-control" id="face" name="face" accept="image/*" capture="user" required>
-  <button class="btn" style="margin-top:8px;" onclick="verifyFace()">Verify Face</button>
-</div>
-<p id="faceStatus" class="muted"></p>
+
+    <!-- QR + Face statuses -->
+ <p id="sessionInfo" class="muted">No active session.</p>
+    <div id="reader" style="width:100%;"></div>
+
+    <!-- Status icons -->
+    <div id="statusBox" style="margin-top:10px;">
+      <span id="qrStatus" class="muted">QR ❌</span> | 
+      <span id="faceStatus" class="muted">Face ❌</span>
+    </div>
 
     <div id="reader" style="width:100%;"></div>
     <div style="display:flex; gap:8px; margin-top:8px;">
@@ -32,18 +32,28 @@
       <input id="manual" class="input" placeholder="Paste STUDENT:STU1001 or STU1001">
       <button class="btn" onclick="manualLog()">Log</button>
     </div>
+
+    
+
     <p id="mode" class="muted">Mode: TOGGLE</p>
     <p id="labMsg" class="muted"></p>
-  </div>
 
+    <div id="faceModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+  <div class="bg-white p-4 rounded shadow-lg w-[400px]">
+    <h3 class="text-lg font-bold mb-2">Face Verification</h3>
+    <video id="faceCamera" autoplay class="w-full border mb-2"></video>
+    <div style="display:flex; gap:8px; margin-top:8px;">
+      <button class="btn" onclick="startFaceVerify()">Verify Face</button>
+      <button class="btn bad" onclick="stopFaceWithPassword()">Stop Face (Operator)</button>
+    </div>
+    <p id="faceVerifyMsg" class="muted mt-2"></p>
+  </div>
+</div>
+
+  </div>
+  
   <div class="card">
-    <h2>Add Lab</h2>
-    <form method="post" action="{{ url_for('add_lab') }}" class="grid grid-2" style="margin:14px 0;">
-      <input class="input" name="name" placeholder="Lab Name" required>
-      <input class="input" name="room" placeholder="Room (optional)">
-      <input class="input" name="code" placeholder="Custom Code (optional)">
-      <button class="btn">+ Add Lab</button>
-    </form>
+    
     <h2>Recent Logs</h2>
     <table class="table">
       <thead><tr><th>Time</th><th>Lab</th><th>Student</th><th>Action</th></tr></thead>

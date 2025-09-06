@@ -12,19 +12,16 @@
       </select>
       <button class="btn" onclick="startSession()">Start / Use Open</button>
     </div>
-    <div class="mb-3">
-  <label for="fingerprint" class="form-label">Fingerprint Code</label>
-  <input type="text" class="form-control" id="fingerprint" name="fingerprint" placeholder="Enter fingerprint" required>
-</div>
-<div class="mb-3">
-  <label for="face" class="form-label">Face Verification</label>
-  <input type="file" class="form-control" id="face" name="face" accept="image/*" capture="user" required>
-  <button class="btn" style="margin-top:8px;" onclick="verifyFace()">Verify Face</button>
-</div>
-<p id="faceStatus" class="muted"></p>
-
+    
     <p id="sessionInfo" class="muted">No active session.</p>
     <div id="reader" style="width:100%;"></div>
+
+    <!-- Status icons -->
+    <div id="statusBox" style="margin-top:10px;">
+      <span id="qrStatus" class="muted">QR ❌</span> | 
+      <span id="faceStatus" class="muted">Face ❌</span>
+    </div>
+
     <div style="display:flex; gap:8px; margin-top:8px;">
       <input id="manual" class="input" placeholder="Paste STUDENT:STU1001 or STU1001">
       <button class="btn" onclick="manualMark()">Mark</button>
@@ -42,6 +39,19 @@
     </ul>
     <h3>Present List (Live)</h3>
     <div id="presentList" class="muted">—</div>
+  </div>
+</div>
+
+<!-- Face verification modal -->
+<div id="faceModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+  <div class="bg-white p-4 rounded shadow-lg w-[400px]">
+    <h3 class="text-lg font-bold mb-2">Face Verification</h3>
+    <video id="faceCamera" autoplay class="w-full border mb-2"></video>
+    <div style="display:flex; gap:8px; margin-top:8px;">
+      <button class="btn" onclick="startFaceVerify()">Verify Face</button>
+      <button class="btn bad" onclick="stopFaceWithPassword()">Stop Face (Operator)</button>
+    </div>
+    <p id="faceVerifyMsg" class="muted mt-2"></p>
   </div>
 </div>
 

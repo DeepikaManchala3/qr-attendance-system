@@ -1,4 +1,7 @@
 let labMode = "TOGGLE";
+let lastScanTimes = {}; // store last scan per student for cooldown
+let currentSid = null;
+let faceVerified = false;
 
 function setMode(m) {
   labMode = m;
@@ -18,7 +21,7 @@ async function fetchJson(url, opts) {
   catch { return { ok: r.ok, status: r.status, data: {} }; }
 }
 
-async function logLab(sid) {
+async function logLabFinal(sid) {
   const lab_id = Number(document.getElementById("lab_id").value);
   const res = await fetchJson("/api/labs/log", {
     method: "POST", headers: {"Content-Type":"application/json"},
@@ -33,22 +36,88 @@ async function logLab(sid) {
   }
 }
 
-function manualLog() {
-  const v = document.getElementById("manual").value;
-  logLab(parseStudent(v));
-}
-
 function ensureScanner() {
   if (window._scanner) return;
   const scanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250 }, false);
   scanner.render((text) => {
-    const t = text.trim();
-    if (t.startsWith("STUDENT:") || t.startsWith("STU")) {
-      logLab(parseStudent(t));
-    }
+    const sid = parseStudent(text);
+    if (!sid) return;
+    currentSid = sid;
+    document.getElementById("qrStatus").textContent = "QR ✅";
+    openFaceModal();
   }, (err) => {});
   window._scanner = scanner;
 }
+
+function openFaceModal() {
+  document.getElementById("faceModal").classList.remove("hidden");
+  navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
+    faceStream = stream;
+    document.getElementById("faceCamera").srcObject = stream;
+  });
+}
+
+function closeFaceModal() {
+  if (faceStream) {
+    faceStream.getTracks().forEach(t => t.stop());
+    faceStream = null;
+  }
+  document.getElementById("faceCamera").srcObject = null;
+  document.getElementById("faceModal").classList.add("hidden");
+}
+
+
+async function startFaceVerify() {
+  const video = document.getElementById("faceCamera");
+  const canvas = document.createElement("canvas");
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  const ctx = canvas.getContext("2d");
+  ctx.drawImage(video, 0, 0);
+  const imgData = canvas.toDataURL("image/png");
+
+  const res = await fetchJson("/api/face/verify", {
+    method: "POST", headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({ sid: currentSid, image: imgData })
+  });
+
+  const msg = document.getElementById("faceVerifyMsg");
+  if (res.ok && res.data.ok) {
+    document.getElementById("faceStatus").textContent = "Face ✅";
+    msg.textContent = "Face verified!";
+    closeFaceModal();
+    logLabFinal(currentSid); // mark attendance after both checks
+  } else {
+    msg.textContent = res.data.error || "Face verification failed";
+  }
+}
+
+async function stopFaceWithPassword() {
+  const pwd = prompt("Enter operator password to stop face verification:");
+  if (!pwd) return;
+
+  const res = await fetchJson("/api/face/stop", {
+    method: "POST", headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({ sid: currentSid, password: pwd })
+  });
+
+  if (res.ok && res.data.ok) {
+    document.getElementById("faceStatus").textContent = "Face ⏭ (skipped)";
+    closeFaceModal();
+    logLabFinal(currentSid); // mark attendance after QR only
+  } else {
+    alert(res.data.error || "Wrong password");
+  }
+}
+
+
+
+function manualLog() {
+  const v = document.getElementById("manual").value;
+  const sid = parseStudent(v);
+  logLabFinal(sid);
+}
+
 
 async function refreshInside() {
   const lab_id = Number(document.getElementById("lab_id").value);
@@ -63,41 +132,3 @@ document.addEventListener("DOMContentLoaded", () => {
   ensureScanner();
   refreshInside();
 });
-
-fetch("/api/labs/log", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ lab_id: labId, sid: sid, fingerprint: fingerprint, action: "TOGGLE" })
-})
-
-async function verifyFace() {
-  if (!sessionId) { alert("Start a session first"); return; }
-
-  const sid = document.getElementById("sid") ? document.getElementById("sid").value : null;
-  const fingerprint = document.getElementById("fingerprint").value;
-  const faceInput = document.getElementById("face");
-  if (!sid || !fingerprint || faceInput.files.length === 0) {
-    alert("Missing student ID, fingerprint, or face image");
-    return;
-  }
-
-  const formData = new FormData();
-  formData.append("sid", sid);
-  formData.append("fingerprint", fingerprint);
-  formData.append("face", faceInput.files[0]);
-
-  const res = await fetch("/api/face/verify", {
-    method: "POST",
-    body: formData
-  });
-  const data = await res.json();
-
-  const m = document.getElementById("faceStatus");
-  if (data.ok) {
-    m.textContent = data.msg || "Face verified ✔️, marking attendance...";
-    // Call markPresent only if face verified
-    markPresent(sid);
-  } else {
-    m.textContent = data.error || "Face verification failed ❌";
-  }
-}

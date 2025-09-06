@@ -10,26 +10,38 @@
       <button class="btn secondary" onclick="setHostelMode('EXIT')">EXIT</button>
       <button class="btn" onclick="setHostelMode('TOGGLE')">TOGGLE</button>
     </div>
-    <div class="mb-3">
-  <label for="fingerprint" class="form-label">Fingerprint Code</label>
-  <input type="text" class="form-control" id="fingerprint" name="fingerprint" placeholder="Enter fingerprint" required>
-</div>
-<div class="mb-3">
-  <label for="face" class="form-label">Face Verification</label>
-  <input type="file" class="form-control" id="face" name="face" accept="image/*" capture="user" required>
-  <button class="btn" style="margin-top:8px;" onclick="verifyFace()">Verify Face</button>
-</div>
-<p id="faceStatus" class="muted"></p>
 
     <div id="reader" style="width:100%;"></div>
-    <div style="display:flex; gap:8px; margin-top:8px;">
+
+    <p id="hMode" class="muted">Mode: TOGGLE</p>
+    <p id="hostelMsg" class="muted"></p>
+
+
+     <!-- Status icons -->
+    <div id="statusBox" style="margin-top:10px;">
+      <span id="qrStatus" class="muted">QR ❌</span> | 
+      <span id="faceStatus" class="muted">Face ❌</span>
+    </div>
+
+
+    <div>
       <input id="manual" class="input" placeholder="Paste STUDENT:STU1001 or STU1001">
       <button class="btn" onclick="manualHostel()">Log</button>
     </div>
-    <p id="hMode" class="muted">Mode: TOGGLE</p>
-    <p id="hostelMsg" class="muted"></p>
-  </div>
 
+    <div id="faceModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+  <div class="bg-white p-4 rounded shadow-lg w-[400px]">
+    <h3 class="text-lg font-bold mb-2">Face Verification</h3>
+    <video id="faceCamera" autoplay class="w-full border mb-2"></video>
+    <div style="display:flex; gap:8px; margin-top:8px;">
+      <button class="btn" onclick="startFaceVerify()">Verify Face</button>
+      <button class="btn bad" onclick="stopFaceWithPassword()">Stop Face (Operator)</button>
+    </div>
+    <p id="faceVerifyMsg" class="muted mt-2"></p>
+
+   </div>
+  </div>
+  </div>
   <div class="card">
     <h2>Recent Hostel Logs</h2>
     <table class="table">
@@ -45,7 +57,8 @@
         {% endfor %}
       </tbody>
     </table>
-  </div>
+  
+</div>
 </div>
 
 <script src="https://unpkg.com/html5-qrcode"></script>

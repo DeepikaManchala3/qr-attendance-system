@@ -7,6 +7,7 @@
     <p class="muted">Initialize DB and load demo data (safe to run once).</p>
     <a class="btn" href="{{ url_for('initdb') }}">Initialize + Seed</a>
   </div>
+
   <div class="card">
     <h2>Tips</h2>
     <ul>
@@ -15,4 +16,47 @@
     </ul>
   </div>
 </div>
+
+<div class="card" style="margin-top:20px;">
+  <h2>Global Face Recognition Control</h2>
+  <p id="faceStatus" class="muted">Loading status...</p>
+  <div style="margin-top:10px; display:flex; gap:10px;">
+    <button class="btn" onclick="setFaceRecognition(true)">Enable</button>
+    <button class="btn secondary" onclick="setFaceRecognition(false)">Disable</button>
+  </div>
+</div>
+
+<script>
+async function fetchJson(url, opts) {
+  const r = await fetch(url, opts);
+  try { return { ok: r.ok, data: await r.json() }; }
+  catch { return { ok: r.ok, data: {} }; }
+}
+
+async function loadStatus() {
+  const res = await fetchJson("/api/admin/face-status");
+  if (res.ok && res.data.ok) {
+    document.getElementById("faceStatus").textContent = res.data.enabled
+      ? "✅ Face Recognition is ENABLED globally"
+      : "❌ Face Recognition is DISABLED globally";
+  } else {
+    document.getElementById("faceStatus").textContent = "⚠️ Failed to load status";
+  }
+}
+
+async function setFaceRecognition(enabled) {
+  const res = await fetchJson("/api/admin/face-toggle", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ enabled })
+  });
+  if (res.ok && res.data.ok) {
+    loadStatus();
+  } else {
+    alert("Failed to update setting");
+  }
+}
+
+document.addEventListener("DOMContentLoaded", loadStatus);
+</script>
 {% endblock %}
