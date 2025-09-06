@@ -5,6 +5,22 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{{ config.APP_NAME }} - {% block title %}{% endblock %}</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+  <style>
+    header {
+      background: #004080;
+      color: #0c071d;
+      text-align: center;
+      padding: 20px;
+    }
+    header h1 { margin: 0; font-size: 28px; }
+    section { padding: 30px; max-width: 900px; margin: auto; }
+    h2 { color: #004080; margin-top: 20px; }
+    p { line-height: 1.6; }
+    .team { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-top: 20px; }
+    .card { background: #004080; border-radius: 12px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center; }
+    .photo { width: 80px; height: 80px; border-radius: 50%; background: #ccc; display: inline-block; margin-bottom: 10px; line-height: 80px; font-weight: bold; color: #555; }
+    footer { text-align: center; background: #004080; color: #fff; padding: 15px; margin-top: 30px; }
+  </style>
 </head>
 <body>
   <div class="container">
@@ -35,6 +51,58 @@
 
     {% block content %}{% endblock %}
     <p class="muted" style="margin-top:24px">© {{ config.APP_NAME }}</p>
+
+    <!-- ===== About Us Section at Bottom ===== -->
+    <header>
+      <h1>QR Based Attendance System</h1>
+      <p>SRKR Engineering College, Bhimavaram</p>
+    </header>
+
+    <section>
+      <h2>About the College</h2>
+      <p>
+        SRKR Engineering College, established in 1980, is a premier institution located in Bhimavaram, Andhra Pradesh.
+        It is affiliated with JNTU Kakinada and offers quality education in engineering and technology.
+        The college is well-known for its modern infrastructure, experienced faculty, and research-driven approach.
+        Students are encouraged to innovate through labs, projects, and industry collaborations.
+      </p>
+
+      <h2>Project Description</h2>
+      <p>
+        Our project introduces a QR-based attendance system for students. It records attendance in classrooms,
+        libraries, labs, and hostel entry/exit in an accurate and paperless way. This reduces manual work, saves
+        time, and improves accuracy. Our aim is to build a secure, fast, and user-friendly attendance solution.
+      </p>
+
+      <h2>Team Members & Roles</h2>
+      <div class="team">
+        <div class="card">
+          <div class="photo">Photo</div>
+          <h3>Deepika</h3>
+          <p>Developed the <b>Library Module</b> using QR codes.</p>
+        </div>
+        <div class="card">
+          <div class="photo">Photo</div>
+          <h3>Jhansi</h3>
+          <p>Designed and implemented the <b>Class Attendance Module</b> using QR codes.</p>
+        </div>
+        <div class="card">
+          <div class="photo">Photo</div>
+          <h3>Leela</h3>
+          <p>Created the <b>Lab Attendance Module</b> using QR codes.</p>
+        </div>
+        <div class="card">
+          <div class="photo">Photo</div>
+          <h3>Gayatri</h3>
+          <p>Developed the <b>Hostel Entry/Exit Module</b> using QR codes.</p>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <p>© 2025 QR Based Attendance Project | SRKR Engineering College</p>
+    </footer>
+    <!-- ===================================== -->
   </div>
 </body>
 </html>
