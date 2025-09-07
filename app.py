@@ -5,6 +5,7 @@ import uuid
 from io import BytesIO
 from datetime import datetime, timedelta, date
 
+
 from flask import Flask, render_template, request, redirect, url_for, jsonify, send_from_directory, flash
 from flask_sqlalchemy import SQLAlchemy
 from config import Config
@@ -33,6 +34,11 @@ app.config.setdefault("QR_FOLDER", os.path.join(os.getcwd(), "qrcodes"))
 
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
+
+from sqlalchemy.sql import func
+
+ts = db.Column(db.DateTime, server_default=func.now())
+
 
 # =========================
 # Models
@@ -64,7 +70,7 @@ class Borrow(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     student_sid = db.Column(db.String(32), db.ForeignKey("students.sid"), nullable=False)
     book_bid = db.Column(db.String(32), db.ForeignKey("books.bid"), nullable=False)
-    borrow_dt = db.Column(db.DateTime, default=datetime.utcnow)
+    borrow_dt = db.Column(db.DateTime, server_default=func.now(), nullable=True)
     due_dt = db.Column(db.DateTime, nullable=False)
     return_dt = db.Column(db.DateTime, nullable=True)
     status = db.Column(db.String(16), default="BORROWED")  # BORROWED / RETURNED
@@ -93,7 +99,7 @@ class AttendanceRecord(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     session_id = db.Column(db.Integer, db.ForeignKey("attendance_sessions.id"), nullable=False)
     student_sid = db.Column(db.String(32), db.ForeignKey("students.sid"), nullable=False)
-    ts = db.Column(db.DateTime, default=datetime.utcnow)
+    ts = db.Column(db.DateTime, server_default=func.now(), nullable=False)  # ← auto DB time
     present = db.Column(db.Boolean, default=True)
     __table_args__ = (db.UniqueConstraint("session_id", "student_sid", name="uq_session_student"),)
 
@@ -112,7 +118,7 @@ class LabLog(db.Model):
     lab_id = db.Column(db.Integer, db.ForeignKey("labs.id"), nullable=False)
     student_sid = db.Column(db.String(32), db.ForeignKey("students.sid"), nullable=False)
     action = db.Column(db.String(8), nullable=False)  # ENTRY or EXIT
-    ts = db.Column(db.DateTime, default=datetime.utcnow, index=True)
+    ts = db.Column(db.DateTime, server_default=func.now(), nullable=False, index=True)
     lab = db.relationship("Lab")
 
 # Hostel
@@ -122,7 +128,8 @@ class HostelLog(db.Model):
     gate = db.Column(db.String(80), default="Main Gate")
     student_sid = db.Column(db.String(32), db.ForeignKey("students.sid"), nullable=False)
     action = db.Column(db.String(8), nullable=False)  # ENTRY or EXIT
-    ts = db.Column(db.DateTime, default=datetime.utcnow, index=True)
+    ts = db.Column(db.DateTime, server_default=func.now(), nullable=False, index=True)
+
 
 # =========================
 # Helpers / filesystem
@@ -278,7 +285,7 @@ def seed_demo():
             Lab(code="LAB-ML-01", name="ML Lab", room="L-301"),
             Lab(code="LAB-NET-02", name="Networks Lab", room="L-208"),
         ])
-    db.session.commit()
+    db.session.commit()    
 
 # =========================
 # Pages
@@ -569,10 +576,6 @@ def api_face_enroll():
 @app.route("/api/face/verify", methods=["POST"])
 def api_face_verify():
     if not app.config.get("FACE_ENABLED_GLOBAL", True):
-<<<<<<< HEAD
-=======
-        # Global toggle OFF: skip face verification
->>>>>>> 7f6fb89d4a7392a1390e4de1c6994760096a92fd
         return jsonify({"ok": True, "msg": "Face recognition globally disabled; verification skipped"})
 
     data = request.get_json(force=True)
@@ -587,7 +590,6 @@ def api_face_verify():
     if not image:
         return jsonify({"ok": False, "error": "No image provided for verification"}), 400
 
-<<<<<<< HEAD
     try:
         # Load reference encoding (from file if available)
         if s.face_encoding_path and os.path.exists(s.face_encoding_path):
@@ -603,30 +605,6 @@ def api_face_verify():
             ref_enc = ref_encs[0]
 
         # Process live/probe image
-=======
-    # If we have a saved encoding, use it (fast)
-    if s.face_encoding_path:
-        success, info = compare_face_encoding(s.face_encoding_path, image)
-        if success:
-            return jsonify({"ok": True, "msg": "Face matched"})
-        else:
-            return jsonify({"ok": False, "error": f"Face mismatch ({info})"}), 400
-
-    # fallback: compare with saved face_image
-    if not face_recognition or not np:
-        return jsonify({"ok": False, "error": "Face recognition libs not available"}), 500
-
-    try:
-        ref_img = face_recognition.load_image_file(s.face_image)
-        ref_locs = face_recognition.face_locations(ref_img, model="hog")
-        if not ref_locs:
-            return jsonify({"ok": False, "error": "No face detected in enrolled image"}), 400
-        ref_encs = face_recognition.face_encodings(ref_img, known_face_locations=ref_locs)
-        if not ref_encs:
-            return jsonify({"ok": False, "error": "No face encoding in enrolled image"}), 400
-        ref_enc = ref_encs[0]
-
->>>>>>> 7f6fb89d4a7392a1390e4de1c6994760096a92fd
         b = _b64_to_bytes(image)
         buf = BytesIO(b)
         probe_img = face_recognition.load_image_file(buf)
@@ -638,14 +616,9 @@ def api_face_verify():
             return jsonify({"ok": False, "error": "No encoding in provided image"}), 400
         probe_enc = probe_encs[0]
 
-<<<<<<< HEAD
         # 🔒 Strict matching for ONLY this student
         dist = np.linalg.norm(ref_enc - probe_enc)
         tol = 0.5  # stricter tolerance to reduce false positives
-=======
-        dist = np.linalg.norm(ref_enc - probe_enc)
-        tol = 0.6
->>>>>>> 7f6fb89d4a7392a1390e4de1c6994760096a92fd
         if dist <= tol:
             return jsonify({"ok": True, "msg": f"Face matched (distance={float(dist):.4f})"})
         else:
@@ -654,11 +627,8 @@ def api_face_verify():
     except Exception as e:
         return jsonify({"ok": False, "error": f"Verification failed: {str(e)}"}), 500
 
-<<<<<<< HEAD
-=======
 
 
->>>>>>> 7f6fb89d4a7392a1390e4de1c6994760096a92fd
 @app.route("/api/face/stop", methods=["POST"])
 def api_face_stop():
     """
@@ -783,10 +753,11 @@ def api_labs_log():
     if action == "TOGGLE":
         last = LabLog.query.filter(LabLog.lab_id == lab_id, LabLog.student_sid == sid).order_by(LabLog.ts.desc()).first()
         action = "EXIT" if (last and last.action == "ENTRY") else "ENTRY"
-    log = LabLog(lab_id=lab_id, student_sid=sid, action=action)
+    log = LabLog(lab_id=lab_id, student_sid=sid, action=action) 
     db.session.add(log)
     db.session.commit()
     return jsonify({"ok": True, "action": action, "ts": log.ts.isoformat()})
+ 
 
 @app.route("/api/labs/stats/<int:lab_id>")
 def api_labs_stats(lab_id):
