@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+{% block title %}Students{% endblock %}
+{% block content %}
+<div class="card">
+  <h2>Students</h2>
+
+  <!-- Search Form -->
+  <form method="get" style="display:flex; gap:10px; margin:10px 0;">
+    <input class="input" name="q" placeholder="Search by name/ID…" value="{{ q }}">
+    <button class="btn">Search</button>
+  </form>
+
+  <!-- Add Student Form -->
+  <form method="post" action="{{ url_for('add_student') }}" class="grid grid-2" style="margin:14px 0;">
+    <input class="input" name="name" placeholder="Full Name" required>
+    <input class="input" name="email" placeholder="Email (optional)">
+    <input class="input" name="sid" placeholder="Custom Student ID (optional)">
+    <button class="btn">+ Add Student</button>
+  </form>
+
+  <!-- Students Table -->
+  <table class="table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Face</th>
+        <th>QR</th>
+        
+      </tr>
+    </thead>
+    <tbody id="studentsTable">
+      {% for s in students %}
+      <tr id="student-{{ s.sid }}">
+        <td>{{ s.sid }}</td>
+        <td>{{ s.name }}</td>
+        <td>{{ s.email or "-" }}</td>
+        <td>
+          {% if s.face_image %}
+            <span class="text-green-600 font-bold">Enrolled ✅</span>
+          {% else %}
+            <button class="btn btn-sm" onclick="openEnrollModal('{{ s.sid }}')">Enroll Face</button>
+          {% endif %}
+        </td>
+        <td>
+          {% if s.face_image %}
+            <a href="{{ url_for('qrcodes', filename='student_' ~ s.sid ~ '.png') }}" target="_blank">View QR</a>
+          {% else %}
+            <span class="text-gray-500">Enroll Face First</span>
+          {% endif %}
+        </td>
+       
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<!-- Modal for Face Enrollment -->
+<div id="enrollModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+  <div class="bg-white p-4 rounded shadow-lg w-[400px]">
+    <h3 class="text-lg font-bold mb-2">Enroll Face</h3>
+    <video id="camera" autoplay class="w-full border mb-2"></video>
+    <div id="capturePreview" class="flex gap-2 mb-2"></div>
+    <button class="btn" onclick="captureFrames()">Start Capture</button>
+    <button class="btn btn-red" onclick="closeEnrollModal()">Cancel</button>
+  </div>
+</div>
+
+<script>
+  let currentSid = null;
+
+  function openEnrollModal(sid) {
+    currentSid = sid;
+    document.getElementById("enrollModal").classList.remove("hidden");
+    navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
+      document.getElementById("camera").srcObject = stream;
+    });
+  }
+
+  function closeEnrollModal() {
+    let cam = document.getElementById("camera");
+    let stream = cam.srcObject;
+    if (stream) {
+      stream.getTracks().forEach(track => track.stop());
+    }
+    cam.srcObject = null;
+    document.getElementById("enrollModal").classList.add("hidden");
+  }
+
+  function captureFrames() {
+  let cam = document.getElementById("camera");
+  let canvas = document.createElement("canvas");
+  let frames = [];
+
+  let interval = setInterval(() => {
+    if (frames.length >= 5) {
+      clearInterval(interval);
+
+      // send frames to server
+      fetch("/api/face/enroll", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sid: currentSid, frames })
+      })
+      .then(res => res.json())
+      .then(data => {
+        alert(data.msg || "Face enrolled!");
+        if (data.ok) {
+          // Update the row dynamically
+          let row = document.getElementById(`student-${currentSid}`);
+          if (row) {
+            // Face cell
+            row.cells[3].innerHTML = '<span class="text-green-600 font-bold">Enrolled ✅</span>';
+            // QR cell
+            row.cells[4].innerHTML = `<a href="/qrcodes/student_${currentSid}.png" target="_blank">View QR</a>`;
+          }
+        }
+      })
+      .catch(err => alert("Error: " + err));
+
+      closeEnrollModal();
+      return;
+    }
+
+    canvas.width = cam.videoWidth;
+    canvas.height = cam.videoHeight;
+    let ctx = canvas.getContext("2d");
+    ctx.drawImage(cam, 0, 0);
+    frames.push(canvas.toDataURL("image/png"));
+  }, 800);
+}
+
+
+</script>
+{% endblock %}

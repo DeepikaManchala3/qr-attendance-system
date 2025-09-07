@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Class Attendance{% endblock %}
+{% block content %}
+<div class="grid grid-2">
+  <div class="card">
+    <h2>Start Attendance Session</h2>
+    <div style="display:flex; gap:8px; margin:8px 0;">
+      <select id="class_id" class="select">
+        {% for c in classes %}
+          <option value="{{ c.id }}">{{ c.name }} ({{ c.code }})</option>
+        {% endfor %}
+      </select>
+      <button class="btn" onclick="startSession()">Start / Use Open</button>
+    </div>
+    
+    <p id="sessionInfo" class="muted">No active session.</p>
+    <div id="reader" style="width:100%;"></div>
+
+    <!-- Status icons -->
+    <div id="statusBox" style="margin-top:10px;">
+      <span id="qrStatus" class="muted">QR ❌</span> | 
+      <span id="faceStatus" class="muted">Face ❌</span>
+    </div>
+
+    <div style="display:flex; gap:8px; margin-top:8px;">
+      <input id="manual" class="input" placeholder="Paste STUDENT:STU1001 or STU1001">
+      <button class="btn" onclick="manualMark()">Mark</button>
+      <button id="stopBtn" class="btn bad" onclick="stopSession()" disabled>Stop Session</button>
+    </div>
+    <p id="markStatus" class="muted"></p>
+  </div>
+
+  <div class="card">
+    <h2>Recent Sessions</h2>
+    <ul>
+      {% for s in recent %}
+        <li>#{{ s.id }} — {{ s.classroom.name }} on {{ s.date_.strftime("%Y-%m-%d") }} — {{ s.status }}</li>
+      {% endfor %}
+    </ul>
+    <h3>Present List (Live)</h3>
+    <div id="presentList" class="muted">—</div>
+  </div>
+</div>
+
+<!-- Face verification modal -->
+<div id="faceModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+  <div class="bg-white p-4 rounded shadow-lg w-[400px]">
+    <h3 class="text-lg font-bold mb-2">Face Verification</h3>
+    <video id="faceCamera" autoplay class="w-full border mb-2"></video>
+    <div style="display:flex; gap:8px; margin-top:8px;">
+      <button class="btn" onclick="startFaceVerify()">Verify Face</button>
+      <button class="btn bad" onclick="stopFaceWithPassword()">Stop Face (Operator)</button>
+    </div>
+    <p id="faceVerifyMsg" class="muted mt-2"></p>
+  </div>
+</div>
+
+<script src="https://unpkg.com/html5-qrcode"></script>
+<script src="{{ url_for('static', filename='js/attendance.js') }}"></script>
+{% endblock %}

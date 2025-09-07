@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}History{% endblock %}
+{% block content %}
+<div class="card">
+  <h2>Recent Borrow/Return</h2>
+  <table class="table">
+    <thead>
+      <tr><th>Student</th><th>Book</th><th>Borrowed</th><th>Due</th><th>Returned</th><th>Status</th></tr>
+    </thead>
+    <tbody>
+      {% for r in rows %}
+      <tr>
+        <td>{{ r.student_sid }}</td>
+        <td>{{ r.book_bid }}</td>
+        <td>{{ r.borrow_dt.strftime("%Y-%m-%d %H:%M") }}</td>
+        <td>{{ r.due_dt.strftime("%Y-%m-%d") }}</td>
+        <td>{{ r.return_dt.strftime("%Y-%m-%d %H:%M") if r.return_dt else "-" }}</td>
+        <td>{{ r.status }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

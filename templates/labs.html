@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}Labs Entry/Exit{% endblock %}
+{% block content %}
+<div class="grid grid-2">
+  <div class="card">
+    <h2>Log Entry/Exit</h2>
+    <div style="display:flex; gap:8px; margin-bottom:8px;">
+      <select id="lab_id" class="select">
+        {% for l in labs %}
+          <option value="{{ l.id }}">{{ l.name }} ({{ l.code }})</option>
+        {% endfor %}
+      </select>
+      <button class="btn" onclick="refreshInside()">Check Inside</button>
+      <span id="inside" class="muted"></span>
+    </div>
+
+    <!-- QR + Face statuses -->
+ <p id="sessionInfo" class="muted">No active session.</p>
+    <div id="reader" style="width:100%;"></div>
+
+    <!-- Status icons -->
+    <div id="statusBox" style="margin-top:10px;">
+      <span id="qrStatus" class="muted">QR ❌</span> | 
+      <span id="faceStatus" class="muted">Face ❌</span>
+    </div>
+
+    <div id="reader" style="width:100%;"></div>
+    <div style="display:flex; gap:8px; margin-top:8px;">
+      <button class="btn" onclick="setMode('ENTRY')">ENTRY</button>
+      <button class="btn secondary" onclick="setMode('EXIT')">EXIT</button>
+      <button class="btn" onclick="setMode('TOGGLE')">TOGGLE</button>
+      <input id="manual" class="input" placeholder="Paste STUDENT:STU1001 or STU1001">
+      <button class="btn" onclick="manualLog()">Log</button>
+    </div>
+
+    
+
+    <p id="mode" class="muted">Mode: TOGGLE</p>
+    <p id="labMsg" class="muted"></p>
+
+    <div id="faceModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+  <div class="bg-white p-4 rounded shadow-lg w-[400px]">
+    <h3 class="text-lg font-bold mb-2">Face Verification</h3>
+    <video id="faceCamera" autoplay class="w-full border mb-2"></video>
+    <div style="display:flex; gap:8px; margin-top:8px;">
+      <button class="btn" onclick="startFaceVerify()">Verify Face</button>
+      <button class="btn bad" onclick="stopFaceWithPassword()">Stop Face (Operator)</button>
+    </div>
+    <p id="faceVerifyMsg" class="muted mt-2"></p>
+  </div>
+</div>
+
+  </div>
+  
+  <div class="card">
+    
+    <h2>Recent Logs</h2>
+    <table class="table">
+      <thead><tr><th>Time</th><th>Lab</th><th>Student</th><th>Action</th></tr></thead>
+      <tbody>
+        {% for r in recent %}
+          <tr>
+            <td>{{ r.ts.strftime("%Y-%m-%d %H:%M") }}</td>
+            <td>{{ r.lab.name }}</td>
+            <td>{{ r.student_sid }}</td>
+            <td>{{ r.action }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script src="https://unpkg.com/html5-qrcode"></script>
+<script src="{{ url_for('static', filename='js/labs.js') }}"></script>
+{% endblock %}

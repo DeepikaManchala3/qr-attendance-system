@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<div class="grid grid-2">
+  <div class="card">
+    <h2>System Overview</h2>
+    <p><strong>Students:</strong> {{ total_students }}</p>
+    <p><strong>Books:</strong> {{ total_books }} |
+      Available: <span class="badge ok">{{ available }}</span> |
+      Borrowed: <span class="badge no">{{ borrowed }}</span></p>
+    <hr style="border-color:#223155; margin:12px 0;">
+    <p><strong>Class Sessions Today:</strong> {{ sessions_today }} (Open: {{ open_sessions }})</p>
+    <p><strong>Lab Entries Today:</strong> {{ lab_entries_today }}</p>
+    <p><strong>Hostel Entries Today:</strong> {{ hostel_entries_today }}</p>
+    <p class="muted">All modules use the same <strong>Student QR</strong>.</p>
+  </div>
+
+  <div class="card">
+    <h2>Quick Actions</h2>
+    <p><a class="btn" href="{{ url_for('scan') }}">📚 Library Borrow/Return</a></p>
+    <p><a class="btn secondary" href="{{ url_for('attendance') }}">📝 Start/Take Attendance</a></p>
+    <p><a class="btn secondary" href="{{ url_for('labs_page') }}">🧪 Labs Entry/Exit</a></p>
+    <p><a class="btn secondary" href="{{ url_for('hostel_page') }}">🏨 Hostel Entry/Exit</a></p>
+  </div>
+</div>
+{% endblock %}

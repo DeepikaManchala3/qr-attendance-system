@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Classes{% endblock %}
+{% block content %}
+<div class="card">
+  <h2>Manage Classes</h2>
+  <form method="post" action="{{ url_for('add_class') }}" class="grid grid-2" style="margin:14px 0;">
+    <input class="input" name="name" placeholder="Class/Course Name (e.g., DSA - CSE A)" required>
+    <input class="input" name="teacher" placeholder="Teacher (optional)">
+    <input class="input" name="code" placeholder="Custom Code (optional)">
+    <button class="btn">+ Add Class</button>
+  </form>
+
+  <table class="table">
+    <thead><tr><th>Code</th><th>Name</th><th>Teacher</th></tr></thead>
+    <tbody>
+    {% for c in classes %}
+      <tr><td>{{ c.code }}</td><td>{{ c.name }}</td><td>{{ c.teacher or "-" }}</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
