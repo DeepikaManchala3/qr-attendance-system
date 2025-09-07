@@ -569,6 +569,10 @@ def api_face_enroll():
 @app.route("/api/face/verify", methods=["POST"])
 def api_face_verify():
     if not app.config.get("FACE_ENABLED_GLOBAL", True):
+<<<<<<< HEAD
+=======
+        # Global toggle OFF: skip face verification
+>>>>>>> 7f6fb89d4a7392a1390e4de1c6994760096a92fd
         return jsonify({"ok": True, "msg": "Face recognition globally disabled; verification skipped"})
 
     data = request.get_json(force=True)
@@ -583,6 +587,7 @@ def api_face_verify():
     if not image:
         return jsonify({"ok": False, "error": "No image provided for verification"}), 400
 
+<<<<<<< HEAD
     try:
         # Load reference encoding (from file if available)
         if s.face_encoding_path and os.path.exists(s.face_encoding_path):
@@ -598,6 +603,30 @@ def api_face_verify():
             ref_enc = ref_encs[0]
 
         # Process live/probe image
+=======
+    # If we have a saved encoding, use it (fast)
+    if s.face_encoding_path:
+        success, info = compare_face_encoding(s.face_encoding_path, image)
+        if success:
+            return jsonify({"ok": True, "msg": "Face matched"})
+        else:
+            return jsonify({"ok": False, "error": f"Face mismatch ({info})"}), 400
+
+    # fallback: compare with saved face_image
+    if not face_recognition or not np:
+        return jsonify({"ok": False, "error": "Face recognition libs not available"}), 500
+
+    try:
+        ref_img = face_recognition.load_image_file(s.face_image)
+        ref_locs = face_recognition.face_locations(ref_img, model="hog")
+        if not ref_locs:
+            return jsonify({"ok": False, "error": "No face detected in enrolled image"}), 400
+        ref_encs = face_recognition.face_encodings(ref_img, known_face_locations=ref_locs)
+        if not ref_encs:
+            return jsonify({"ok": False, "error": "No face encoding in enrolled image"}), 400
+        ref_enc = ref_encs[0]
+
+>>>>>>> 7f6fb89d4a7392a1390e4de1c6994760096a92fd
         b = _b64_to_bytes(image)
         buf = BytesIO(b)
         probe_img = face_recognition.load_image_file(buf)
@@ -609,9 +638,14 @@ def api_face_verify():
             return jsonify({"ok": False, "error": "No encoding in provided image"}), 400
         probe_enc = probe_encs[0]
 
+<<<<<<< HEAD
         # 🔒 Strict matching for ONLY this student
         dist = np.linalg.norm(ref_enc - probe_enc)
         tol = 0.5  # stricter tolerance to reduce false positives
+=======
+        dist = np.linalg.norm(ref_enc - probe_enc)
+        tol = 0.6
+>>>>>>> 7f6fb89d4a7392a1390e4de1c6994760096a92fd
         if dist <= tol:
             return jsonify({"ok": True, "msg": f"Face matched (distance={float(dist):.4f})"})
         else:
@@ -620,6 +654,11 @@ def api_face_verify():
     except Exception as e:
         return jsonify({"ok": False, "error": f"Verification failed: {str(e)}"}), 500
 
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> 7f6fb89d4a7392a1390e4de1c6994760096a92fd
 @app.route("/api/face/stop", methods=["POST"])
 def api_face_stop():
     """
