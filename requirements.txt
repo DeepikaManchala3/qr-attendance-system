@@ -11,3 +11,5 @@ qrcode==7.3
 Click==8.1.8
 colorama==0.4.6
 gunicorn
+pymysql
+
