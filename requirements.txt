@@ -6,8 +6,8 @@ Pillow==10.1.0
 numpy==1.26.0
 python-dotenv==1.0.0
 qrcode==7.3
+dlib==19.24.2
 face_recognition==1.3.0
-dlib==19.22.99
 Click==8.1.8
 colorama==0.4.6
 gunicorn
